@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Inertia\Inertia;
+use Inertia\Response;
 use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
@@ -40,12 +42,15 @@ class PermissionController extends Controller
 
         $permissions = $query->paginate($validPerPage)->withQueryString();
 
-        return view('admin.permissions.index', compact('permissions'));
+        return Inertia::render('Admin/Permissions/Index', [
+            'permissions' => $permissions,
+            'filters' => ['search' => request('search', ''), 'per_page' => $validPerPage],
+        ]);
     }
 
     public function create()
     {
-        return view('admin.permissions.create');
+        return Inertia::render('Admin/Permissions/Create');
     }
 
     public function store(Request $request)
@@ -62,7 +67,9 @@ class PermissionController extends Controller
 
     public function edit(Permission $permission)
     {
-        return view('admin.permissions.edit', compact('permission'));
+        return Inertia::render('Admin/Permissions/Edit', [
+            'permission' => $permission,
+        ]);
     }
 
     public function update(Request $request, Permission $permission)

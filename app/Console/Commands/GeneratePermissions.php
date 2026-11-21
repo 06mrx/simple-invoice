@@ -17,6 +17,10 @@ class GeneratePermissions extends Command
         'permission' => ['view', 'create', 'edit', 'delete'],
         'audit' => ['view'],
         'bayi' => ['view', 'create', 'edit', 'delete'],
+        'customer' => ['view', 'create', 'edit', 'delete'],
+        'purchaseorder' => ['view', 'create', 'edit', 'delete'],
+        'invoice' => ['view', 'create', 'edit', 'delete', 'send'],
+        'invoicesetting' => ['view', 'edit'],
     ];
 
     public function handle()

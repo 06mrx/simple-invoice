@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class AdminSeeder extends Seeder
@@ -13,6 +14,30 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
+
+        Artisan::call('permission:generate');
+        Artisan::call('permission:discover');
+
+        Permission::where('name', 'like', '%-installationitem')->delete();
+
+        $invoiceAdminRole = Role::firstOrCreate(['name' => 'admin-invoice']);
+        $invoiceAdminRole->syncPermissions(Permission::whereIn('name', [
+            'view-customer',
+            'create-customer',
+            'edit-customer',
+            'delete-customer',
+            'view-purchaseorder',
+            'create-purchaseorder',
+            'edit-purchaseorder',
+            'delete-purchaseorder',
+            'view-invoice',
+            'create-invoice',
+            'edit-invoice',
+            'delete-invoice',
+            'send-invoice',
+            'view-invoicesetting',
+            'edit-invoicesetting',
+        ])->get());
 
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@template.com'],
@@ -27,6 +52,11 @@ class AdminSeeder extends Seeder
             $adminUser->assignRole($adminRole);
         }
 
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole->syncPermissions(
+            Permission::where('name', 'view-bayi')->get()
+        );
+
         $dummyUser = User::firstOrCreate(
             ['email' => 'dummy@example.com'],
             [
@@ -36,11 +66,16 @@ class AdminSeeder extends Seeder
             ]
         );
 
-        if (! $dummyUser->hasRole('admin')) {
-            $dummyUser->assignRole($adminRole);
+        foreach ($dummyUser->getRoleNames() as $roleName) {
+            if ($roleName !== 'user') {
+                $dummyUser->removeRole($roleName);
+            }
         }
 
-        Artisan::call('permission:generate');
-        Artisan::call('permission:discover');
+        if (! $dummyUser->hasRole('user')) {
+            $dummyUser->assignRole($userRole);
+        }
+
+        $this->call(InvoiceSettingSeeder::class);
     }
 }

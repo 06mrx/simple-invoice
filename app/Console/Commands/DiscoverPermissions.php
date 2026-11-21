@@ -20,7 +20,7 @@ class DiscoverPermissions extends Command
      *
      * @var string
      */
-    protected $description = 'Auto discover permissions based on admin routes and assign to "admin" role';
+    protected $description = 'Auto discover module permissions and assign to "admin" role';
 
     /**
      * Map method to permission action.
@@ -29,11 +29,13 @@ class DiscoverPermissions extends Command
      */
     protected $actionMap = [
         'index' => 'view',
+        'show' => 'view',
         'create' => 'create',
         'store' => 'create',
         'edit' => 'edit',
         'update' => 'edit',
         'destroy' => 'delete',
+        'send' => 'send',
     ];
 
     /**
@@ -50,14 +52,13 @@ class DiscoverPermissions extends Command
         foreach ($routes as $route) {
             $action = $route->getAction();
 
-            // Pastikan route menggunakan controller dan berada di namespace Admin
-            if (! isset($action['controller']) || ! str_starts_with($action['controller'], 'App\\Http\\Controllers\\Admin\\')) {
+            if (! isset($action['controller']) || ! str_starts_with($action['controller'], 'App\\Http\\Controllers\\')) {
                 continue;
             }
 
-            // Cek apakah route dimulai dengan 'admin.'
             $routeName = $route->getName();
-            if (! $routeName || ! str_starts_with($routeName, 'admin.')) {
+            $prefixes = ['admin.', 'customers.', 'purchase-orders.', 'invoices.', 'invoice-settings.'];
+            if (! $routeName || ! collect($prefixes)->contains(fn (string $prefix) => str_starts_with($routeName, $prefix))) {
                 continue;
             }
 

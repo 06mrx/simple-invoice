@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Inertia\Inertia;
+use Inertia\Response;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -33,14 +35,20 @@ class UserController extends Controller
 
         $users = $query->paginate($validPerPage)->withQueryString();
 
-        return view('admin.users.index', compact('users'));
+        return Inertia::render('Admin/Users/Index', [
+            'users' => $users,
+            'filters' => ['search' => request('search', ''), 'per_page' => $validPerPage],
+            'roles' => \Spatie\Permission\Models\Role::all(),
+        ]);
     }
 
     public function create()
     {
         $roles = Role::all();
 
-        return view('admin.users.create', compact('roles'));
+        return Inertia::render('Admin/Users/Create', [
+            'roles' => $roles,
+        ]);
     }
 
     public function store(Request $request)
@@ -68,9 +76,13 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $user->load('roles');
         $roles = Role::all();
 
-        return view('admin.users.edit', compact('user', 'roles'));
+        return Inertia::render('Admin/Users/Edit', [
+            'user' => $user,
+            'roles' => $roles,
+        ]);
     }
 
     public function update(Request $request, User $user)

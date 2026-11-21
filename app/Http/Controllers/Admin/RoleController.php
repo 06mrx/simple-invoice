@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Inertia\Inertia;
+use Inertia\Response;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -31,7 +33,7 @@ class RoleController extends Controller
         // Validasi nilai input (opsional tapi aman)
         $validPerPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 10;
 
-        $query = Role::query();
+        $query = Role::with('permissions');
 
         if (request()->has('search') && request('search') != '') {
             $search = request('search');
@@ -40,14 +42,19 @@ class RoleController extends Controller
 
         $roles = $query->paginate($validPerPage)->withQueryString();
 
-        return view('admin.roles.index', compact('roles'));
+        return Inertia::render('Admin/Roles/Index', [
+            'roles' => $roles,
+            'filters' => ['search' => request('search', ''), 'per_page' => $validPerPage],
+        ]);
     }
 
     public function create()
     {
         $permissions = Permission::all();
 
-        return view('admin.roles.create', compact('permissions'));
+        return Inertia::render('Admin/Roles/Create', [
+            'permissions' => $permissions,
+        ]);
     }
 
     public function store(Request $request)
@@ -65,9 +72,13 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
 
+        $role->load('permissions');
         $permissions = Permission::all();
 
-        return view('admin.roles.edit', compact('role', 'permissions'));
+        return Inertia::render('Admin/Roles/Edit', [
+            'role' => $role,
+            'permissions' => $permissions,
+        ]);
     }
 
     public function update(Request $request, Role $role)

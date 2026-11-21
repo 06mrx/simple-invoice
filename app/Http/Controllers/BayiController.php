@@ -6,6 +6,8 @@ use App\Models\Bayi;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class BayiController extends Controller
 {
@@ -17,12 +19,12 @@ class BayiController extends Controller
         $this->middleware('permission:delete-bayi')->only(['destroy']);
     }
 
-    public function index()
+    public function index(): Response
     {
         $perPage = request('per_page', 10);
         $validPerPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 10;
 
-        $query = Bayi::withTrashed(); // Include soft-deleted data jika perlu ditampilkan statusnya
+        $query = Bayi::withTrashed();
 
         if (request()->has('search') && request('search') != '') {
             $search = request('search');
@@ -33,12 +35,18 @@ class BayiController extends Controller
 
         $bayis = $query->paginate($validPerPage)->withQueryString();
 
-        return view('bayi.index', compact('bayis'));
+        return Inertia::render('Bayi/Index', [
+            'bayis' => $bayis,
+            'filters' => [
+                'search' => request('search', ''),
+                'per_page' => $validPerPage,
+            ],
+        ]);
     }
 
-    public function create()
+    public function create(): Response
     {
-        return view('bayi.create');
+        return Inertia::render('Bayi/Create');
     }
 
     public function store(Request $request)
@@ -78,9 +86,11 @@ class BayiController extends Controller
             ->with('success', 'Data bayi berhasil ditambahkan.');
     }
 
-    public function edit(Bayi $bayi)
+    public function edit(Bayi $bayi): Response
     {
-        return view('bayi.edit', compact('bayi'));
+        return Inertia::render('Bayi/Edit', [
+            'bayi' => $bayi,
+        ]);
     }
 
     public function update(Request $request, Bayi $bayi)

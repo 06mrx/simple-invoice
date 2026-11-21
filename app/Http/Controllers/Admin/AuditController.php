@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AuditController extends Controller
 {
@@ -41,11 +43,21 @@ class AuditController extends Controller
 
         $audits = $query->paginate($perPage);
 
-        return view('admin.audit.index', compact('audits'));
+        return Inertia::render('Admin/Audit/Index', [
+            'audits' => $audits,
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'event' => $request->input('event', ''),
+                'user_id' => $request->input('user_id', ''),
+                'per_page' => $perPage,
+            ],
+        ]);
     }
 
     public function show(Audit $audit)
     {
-        return view('admin.audit.show', compact('audit'));
+        return Inertia::render('Admin/Audit/Show', [
+            'audit' => $audit,
+        ]);
     }
 }
