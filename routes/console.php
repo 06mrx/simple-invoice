@@ -13,5 +13,5 @@ Schedule::command('invoices:dispatch-due')
     ->withoutOverlapping();
 
 Schedule::command('queue:work --stop-when-empty --tries=3 --backoff=10 --max-time=50')
-    ->everyMinute()
+    ->hourly()
     ->withoutOverlapping();
