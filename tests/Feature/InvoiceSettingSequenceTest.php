@@ -48,6 +48,8 @@ class InvoiceSettingSequenceTest extends TestCase
             'generate_day' => $values['invoice.generate_day'],
             'generate_time' => $values['invoice.generate_time'],
             'timezone' => $values['invoice.timezone'],
+            'schedule_mode' => $values['invoice.schedule_mode'],
+            'email_template' => $values['invoice.email_template'],
             'last_invoice_sequence' => 2000,
             'last_customer_number' => 50,
         ])->assertSessionHasNoErrors();

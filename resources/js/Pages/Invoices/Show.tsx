@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/Components/ConfirmDialog';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
@@ -11,7 +12,9 @@ import {
 } from '@/Components/ui/table';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { usePermissions } from '@/hooks/use-permissions';
+import { formatDate } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 
 type InvoiceItem = {
     id: string;
@@ -51,6 +54,8 @@ type Invoice = {
 
 export default function InvoicesShow({ invoice }: { invoice: Invoice }) {
     const { can } = usePermissions();
+    const [confirmSend, setConfirmSend] = useState(false);
+    const [sending, setSending] = useState(false);
 
     return (
         <AuthenticatedLayout
@@ -102,9 +107,14 @@ export default function InvoicesShow({ invoice }: { invoice: Invoice }) {
                                 <p className="text-muted-foreground text-xs">
                                     Periode
                                 </p>
-                                <p className="font-medium">{invoice.period}</p>
+                                <p className="font-medium">
+                                    {formatDate(invoice.period, {
+                                        month: 'long',
+                                        year: 'numeric',
+                                    })}
+                                </p>
                                 <p className="text-sm">
-                                    Tanggal: {invoice.invoice_date}
+                                    Tanggal: {formatDate(invoice.invoice_date)}
                                 </p>
                                 <p className="text-sm">
                                     PO:{' '}
@@ -142,21 +152,7 @@ export default function InvoicesShow({ invoice }: { invoice: Invoice }) {
                             {!invoice.sent_at && can('send-invoice') && (
                                 <Button
                                     size="sm"
-                                    onClick={() => {
-                                        if (
-                                            confirm(
-                                                'Kirim invoice ke ' +
-                                                    invoice.customer.email +
-                                                    '?',
-                                            )
-                                        )
-                                            router.post(
-                                                route(
-                                                    'invoices.send',
-                                                    invoice.id,
-                                                ),
-                                            );
-                                    }}
+                                    onClick={() => setConfirmSend(true)}
                                 >
                                     Kirim Email
                                 </Button>
@@ -241,6 +237,27 @@ export default function InvoicesShow({ invoice }: { invoice: Invoice }) {
                     </Button>
                 </div>
             </div>
+            <ConfirmDialog
+                open={confirmSend}
+                title="Kirim Invoice"
+                description={`Kirim invoice ke ${invoice.customer.email}?`}
+                confirmLabel="Kirim"
+                processing={sending}
+                onClose={() => setConfirmSend(false)}
+                onConfirm={() => {
+                    setSending(true);
+                    router.post(
+                        route('invoices.send', invoice.id),
+                        {},
+                        {
+                            onFinish: () => {
+                                setSending(false);
+                                setConfirmSend(false);
+                            },
+                        },
+                    );
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

@@ -135,7 +135,7 @@ class DashboardController extends Controller
             ->all();
 
         return Inertia::render('Dashboard/Invoice', [
-            'period' => $currentStart->format('d M Y').' - '.$now->format('d M Y'),
+            'period' => $currentStart->copy()->locale('id')->translatedFormat('j F Y').' - '.$now->copy()->locale('id')->translatedFormat('j F Y'),
             'metrics' => [
                 'total_invoices' => $totalInvoices,
                 'total_revenue' => $totalRevenue,

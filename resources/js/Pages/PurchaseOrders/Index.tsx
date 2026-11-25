@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/Components/ConfirmDialog';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
 import { Input } from '@/Components/ui/input';
@@ -11,6 +12,7 @@ import {
 } from '@/Components/ui/table';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { usePermissions } from '@/hooks/use-permissions';
+import { formatDate } from '@/lib/utils';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 
@@ -39,6 +41,9 @@ export default function PurchaseOrdersIndex({
 }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [customerId, setCustomerId] = useState(filters.customer_id ?? '');
+    const [deleteTarget, setDeleteTarget] = useState<PurchaseOrder | null>(
+        null,
+    );
     const flash = usePage().props.flash;
     const { can } = usePermissions();
 
@@ -61,6 +66,16 @@ export default function PurchaseOrdersIndex({
                     {flash?.success && (
                         <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                             {flash.success}
+                        </div>
+                    )}
+                    {flash?.info && (
+                        <div className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                            {flash.info}
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            {flash.error}
                         </div>
                     )}
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -133,7 +148,7 @@ export default function PurchaseOrdersIndex({
                                             <TableCell>
                                                 {po.invoice_po_code}
                                             </TableCell>
-                                            <TableCell>{po.po_date}</TableCell>
+                                            <TableCell>{formatDate(po.po_date)}</TableCell>
                                             <TableCell>
                                                 <a
                                                     className="text-primary hover:underline"
@@ -189,19 +204,11 @@ export default function PurchaseOrdersIndex({
                                                         <Button
                                                             variant="destructive"
                                                             size="sm"
-                                                            onClick={() => {
-                                                                if (
-                                                                    confirm(
-                                                                        'Hapus PO?',
-                                                                    )
+                                                            onClick={() =>
+                                                                setDeleteTarget(
+                                                                    po,
                                                                 )
-                                                                    router.delete(
-                                                                        route(
-                                                                            'purchase-orders.destroy',
-                                                                            po.id,
-                                                                        ),
-                                                                    );
-                                                            }}
+                                                            }
                                                         >
                                                             Hapus
                                                         </Button>
@@ -243,6 +250,25 @@ export default function PurchaseOrdersIndex({
                     </div>
                 </div>
             </div>
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Hapus PO"
+                description={
+                    deleteTarget
+                        ? `Hapus PO ${deleteTarget.invoice_po_code}?`
+                        : undefined
+                }
+                confirmLabel="Hapus"
+                destructive
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => {
+                    if (!deleteTarget) return;
+                    router.delete(
+                        route('purchase-orders.destroy', deleteTarget.id),
+                        { onFinish: () => setDeleteTarget(null) },
+                    );
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

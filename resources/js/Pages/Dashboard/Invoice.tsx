@@ -19,6 +19,7 @@ import {
 } from '@/Components/ui/table';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { usePermissions } from '@/hooks/use-permissions';
+import { formatDate } from '@/lib/utils';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
@@ -107,12 +108,7 @@ const shortRupiah = (value: number) =>
         maximumFractionDigits: 1,
     }).format(value);
 
-const formatDate = (value: string) =>
-    new Date(`${value}T00:00:00`).toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    });
+/* date formatted via shared util */
 
 const initials = (name: string) =>
     name

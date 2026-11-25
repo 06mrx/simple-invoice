@@ -1,6 +1,14 @@
+import RichTextEditor from '@/Components/RichTextEditor';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/ui/select';
 import { Textarea } from '@/Components/ui/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -21,6 +29,8 @@ type InvoiceSettings = {
     generate_day: string | number;
     generate_time: string;
     timezone: string;
+    schedule_mode: string;
+    email_template: string;
     last_invoice_sequence: string | number;
     last_customer_number: string | number;
 };
@@ -49,6 +59,8 @@ export default function InvoiceSettingsEdit({
         generate_day: stringValue(settings.generate_day),
         generate_time: stringValue(settings.generate_time),
         timezone: stringValue(settings.timezone),
+        schedule_mode: stringValue(settings.schedule_mode || 'generate_day'),
+        email_template: stringValue(settings.email_template),
         last_invoice_sequence: stringValue(settings.last_invoice_sequence),
         last_customer_number: stringValue(settings.last_customer_number),
     });
@@ -84,6 +96,16 @@ export default function InvoiceSettingsEdit({
                     {flash?.success && (
                         <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                             {flash.success}
+                        </div>
+                    )}
+                    {flash?.info && (
+                        <div className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                            {flash.info}
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            {flash.error}
                         </div>
                     )}
                     <form
@@ -131,15 +153,65 @@ export default function InvoiceSettingsEdit({
                         <div>
                             <h3 className="font-semibold">Generasi Invoice</h3>
                             <p className="text-muted-foreground text-sm">
-                                Schedule runner tetap berjalan pukul 08:00
-                                Asia/Makassar.
+                                Scheduler cek setiap jam; jam dicocokkan dari
+                                Jam Generate, menit diabaikan.
                             </p>
                         </div>
-                        <div className="grid gap-4 sm:grid-cols-4">
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             {field('tax_rate', 'Pajak (0 - 1)')}
+                            <div>
+                                <Label>Mode Penjadwalan</Label>
+                                <Select
+                                    value={data.schedule_mode}
+                                    onValueChange={(value) =>
+                                        setData('schedule_mode', value)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="generate_day">
+                                            Tanggal Setting
+                                        </SelectItem>
+                                        <SelectItem value="po_day">
+                                            Tanggal PO Customer
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {errors.schedule_mode && (
+                                    <p className="text-destructive text-sm">
+                                        {errors.schedule_mode}
+                                    </p>
+                                )}
+                            </div>
                             {field('generate_day', 'Tanggal Generate')}
                             {field('generate_time', 'Jam Generate', 'time')}
                             {field('timezone', 'Timezone')}
+                        </div>
+
+                        <div>
+                            <h3 className="font-semibold">
+                                Template Email Invoice
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                                Gunakan placeholder untuk menyisipkan data
+                                invoice.
+                            </p>
+                        </div>
+                        <div>
+                            <Label>Template Email</Label>
+                            <RichTextEditor
+                                value={data.email_template}
+                                onChange={(value) =>
+                                    setData('email_template', value)
+                                }
+                            />
+                            {errors.email_template && (
+                                <p className="text-destructive text-sm">
+                                    {errors.email_template}
+                                </p>
+                            )}
                         </div>
 
                         <div>

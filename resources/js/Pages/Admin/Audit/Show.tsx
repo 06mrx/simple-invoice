@@ -1,5 +1,6 @@
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatDate } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/react';
 
 type User = { id: number; name: string };
@@ -26,7 +27,7 @@ export default function AuditShow({ audit }: { audit: Audit }) {
                         <div className="grid gap-2 text-sm">
                             <div>
                                 <span className="font-medium">Waktu:</span>{' '}
-                                {audit.created_at}
+                                {formatDate(audit.created_at)}
                             </div>
                             <div>
                                 <span className="font-medium">Event:</span>{' '}

@@ -11,6 +11,7 @@ import {
     TableRow,
 } from '@/Components/ui/table';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatDate } from '@/lib/utils';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -68,6 +69,16 @@ export default function AuditIndex({
                             {flash.success}
                         </div>
                     )}
+                    {flash?.info && (
+                        <div className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                            {flash.info}
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            {flash.error}
+                        </div>
+                    )}
                     <form
                         onSubmit={submit}
                         className="flex flex-col gap-2 sm:flex-row"
@@ -114,7 +125,7 @@ export default function AuditIndex({
                                     audits.data.map((audit) => (
                                         <TableRow key={audit.id}>
                                             <TableCell>
-                                                {audit.created_at}
+                                                {formatDate(audit.created_at)}
                                             </TableCell>
                                             <TableCell>
                                                 <Badge>{audit.event}</Badge>

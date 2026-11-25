@@ -28,8 +28,13 @@ class Customer extends Model implements Auditable
         'bank_name',
         'bank_account',
         'bank_account_name',
+        'include_po_attachment',
         'created_by',
         'modified_by',
+    ];
+
+    protected $casts = [
+        'include_po_attachment' => 'boolean',
     ];
 
     public $incrementing = false;

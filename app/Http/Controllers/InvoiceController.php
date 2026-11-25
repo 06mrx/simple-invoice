@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Jobs\GenerateInvoicesJob;
 use App\Models\PurchaseOrder;
 use App\Services\InvoiceGenerator;
 use App\Services\InvoiceMailer;
@@ -53,7 +54,7 @@ class InvoiceController extends Controller
             ->get()
             ->map(fn (PurchaseOrder $purchaseOrder) => [
                 'id' => $purchaseOrder->id,
-                'label' => $purchaseOrder->invoice_po_code.' - '.$purchaseOrder->customer?->name.' - '.$purchaseOrder->po_date->toDateString(),
+                'label' => $purchaseOrder->invoice_po_code.' - '.$purchaseOrder->customer?->name.' - '.($purchaseOrder->po_date?->locale('id')->translatedFormat('j F Y') ?? '-'),
             ]);
 
         return Inertia::render('Invoices/Index', [
@@ -86,24 +87,28 @@ class InvoiceController extends Controller
             'include_installation' => 'boolean',
         ]);
 
-        $timezone = (string) $this->settings->get('invoice.timezone', 'Asia/Makassar');
+        $timezone = (string) $this->settings->get('invoice.timezone', 'Asia/Makassar', (string) auth()->id());
         $date = $data['date']
             ? Carbon::parse($data['date'], $timezone)->startOfDay()
             : Carbon::today($timezone);
 
         $includeInstallation = $request->boolean('include_installation');
 
-        if ($data['purchase_order_id']) {
-            $purchaseOrder = PurchaseOrder::where('created_by', auth()->id())
+        if (! empty($data['purchase_order_id'])) {
+            PurchaseOrder::where('created_by', auth()->id())
                 ->findOrFail($data['purchase_order_id']);
-            $this->generator->generateForPurchaseOrder($purchaseOrder, $date, $includeInstallation);
-            $count = 1;
-        } else {
-            $count = $this->generator->generateForDate($date, true, $includeInstallation, (string) auth()->id())->count();
         }
 
+        GenerateInvoicesJob::dispatch(
+            (string) auth()->id(),
+            $date->toDateString(),
+            $data['purchase_order_id'] ?? null,
+            $includeInstallation,
+            true
+        );
+
         return redirect()->route('invoices.index')
-            ->with('success', "Invoice berhasil dibuat: {$count}.");
+            ->with('info', 'Proses generate invoice sedang berjalan di latar belakang.');
     }
 
     public function send(Invoice $invoice)

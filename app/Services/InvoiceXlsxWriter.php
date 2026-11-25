@@ -55,7 +55,7 @@ class InvoiceXlsxWriter
         $sheet->setCellValue('A3', $settings['invoice.address'] ?? '');
         $sheet->setCellValue('A4', $settings['invoice.city'] ?? '');
         $sheet->setCellValue('F5', $invoice->invoice_number);
-        $sheet->setCellValue('H5', $invoice->invoice_date->format('d/m/Y'));
+        $sheet->setCellValue('H5', $invoice->invoice_date?->locale('id')->translatedFormat('j F Y'));
         $sheet->setCellValue('F8', $invoice->customer->code);
         $sheet->setCellValue('H8', 'Transfer '.($settings['invoice.bank_name'] ?? '').' ke');
         $sheet->setCellValue('H9', $settings['invoice.bank_account'] ?? '');

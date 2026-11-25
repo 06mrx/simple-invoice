@@ -31,23 +31,26 @@ class InvoiceSettingController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'npwp' => 'nullable|string|max:100',
+            'company_name' => 'nullable|string|max:255',
+            'npwp' => 'nullable|string|max:50',
             'address' => 'nullable|string',
-            'city' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
             'phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'contact_name' => 'nullable|string|max:255',
             'bank_name' => 'nullable|string|max:100',
             'bank_account' => 'nullable|string|max:100',
-            'bank_account_name' => 'nullable|string|max:100',
+            'bank_account_name' => 'nullable|string|max:255',
             'tax_rate' => 'required|numeric|min:0|max:1',
             'generate_day' => 'required|integer|min:1|max:28',
-            'generate_time' => 'required|date_format:H:i',
-            'timezone' => 'required|string|timezone',
-            'last_invoice_sequence' => 'required|integer|min:0|max:9999',
-            'last_customer_number' => 'required|integer|min:0|max:999999',
+            'generate_time' => ['required', 'date_format:H:i'],
+            'timezone' => ['required', 'timezone'],
+            'schedule_mode' => ['required', 'in:generate_day,po_day'],
+            'email_template' => 'required|string|max:10000',
+            'last_invoice_sequence' => 'required|integer|min:0|max:9999999999',
+            'last_customer_number' => 'required|integer|min:0|max:9999999999',
         ]);
+
 
         $values = collect($data)
             ->mapWithKeys(fn (mixed $value, string $key) => ['invoice.'.$key => $value])

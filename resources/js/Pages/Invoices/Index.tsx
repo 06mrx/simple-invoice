@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/Components/ConfirmDialog';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
@@ -14,6 +15,7 @@ import {
 } from '@/Components/ui/table';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { usePermissions } from '@/hooks/use-permissions';
+import { formatDate } from '@/lib/utils';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 
@@ -55,6 +57,7 @@ export default function InvoicesIndex({
 }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
     const flash = usePage().props.flash;
     const { can } = usePermissions();
     const generate = useForm({
@@ -90,6 +93,16 @@ export default function InvoicesIndex({
                     {flash?.success && (
                         <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                             {flash.success}
+                        </div>
+                    )}
+                    {flash?.info && (
+                        <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">
+                            {flash.info}
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                            {flash.error}
                         </div>
                     )}
 
@@ -218,7 +231,10 @@ export default function InvoicesIndex({
                                                 {invoice.customer.name}
                                             </TableCell>
                                             <TableCell>
-                                                {invoice.period}
+                                                {formatDate(invoice.period, {
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}
                                             </TableCell>
                                             <TableCell>
                                                 {invoice.purchase_order
@@ -288,19 +304,11 @@ export default function InvoicesIndex({
                                                         <Button
                                                             variant="destructive"
                                                             size="sm"
-                                                            onClick={() => {
-                                                                if (
-                                                                    confirm(
-                                                                        'Hapus invoice?',
-                                                                    )
+                                                            onClick={() =>
+                                                                setDeleteTarget(
+                                                                    invoice,
                                                                 )
-                                                                    router.delete(
-                                                                        route(
-                                                                            'invoices.destroy',
-                                                                            invoice.id,
-                                                                        ),
-                                                                    );
-                                                            }}
+                                                            }
                                                         >
                                                             Hapus
                                                         </Button>
@@ -342,6 +350,24 @@ export default function InvoicesIndex({
                     </div>
                 </div>
             </div>
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Hapus Invoice"
+                description={
+                    deleteTarget
+                        ? `Hapus invoice ${deleteTarget.invoice_number}?`
+                        : undefined
+                }
+                confirmLabel="Hapus"
+                destructive
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => {
+                    if (!deleteTarget) return;
+                    router.delete(route('invoices.destroy', deleteTarget.id), {
+                        onFinish: () => setDeleteTarget(null),
+                    });
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

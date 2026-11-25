@@ -40,7 +40,7 @@ export default function PurchaseOrdersEdit({
     const { data, setData, put, processing, errors } = useForm({
         customer_id: purchaseOrder.customer_id,
         invoice_po_code: purchaseOrder.invoice_po_code,
-        po_date: purchaseOrder.po_date,
+        po_date: purchaseOrder.po_date?.slice(0, 10) ?? '',
         file: null as File | null,
         notes: purchaseOrder.notes ?? '',
         items: purchaseOrder.items.map((item) => ({

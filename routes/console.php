@@ -8,7 +8,10 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('invoices:generate')
-    ->dailyAt('08:00')
-    ->timezone('Asia/Makassar')
+Schedule::command('invoices:dispatch-due')
+    ->hourly()
+    ->withoutOverlapping();
+
+Schedule::command('queue:work --stop-when-empty --tries=3 --backoff=10 --max-time=50')
+    ->everyMinute()
     ->withoutOverlapping();

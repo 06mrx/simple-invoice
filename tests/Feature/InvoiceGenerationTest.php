@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\GenerateInvoicesJob;
 use App\Mail\InvoiceGenerated;
 use App\Models\Customer;
 use App\Models\InstallationItem;
@@ -13,6 +14,7 @@ use Database\Seeders\AdminSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -90,6 +92,7 @@ class InvoiceGenerationTest extends TestCase
                 $purchaseOrder,
                 Carbon::parse('2025-11-01'),
                 true,
+                true,
             );
 
         $this->assertNotSame($invoice->id, $again->id);
@@ -104,5 +107,64 @@ class InvoiceGenerationTest extends TestCase
 
         $this->assertCount(0, $generator->generateForDate(Carbon::parse('2025-11-02')));
         $this->assertCount(0, $generator->generateForDate(Carbon::parse('2025-11-01')));
+    }
+
+    public function test_manual_generate_dispatches_job(): void
+    {
+        Queue::fake();
+        $user = \App\Models\User::query()->firstOrFail();
+
+        $this->actingAs($user)
+            ->post(route('invoices.generate'), ['date' => '2025-11-01'])
+            ->assertRedirect(route('invoices.index'))
+            ->assertSessionHas('info');
+
+        Queue::assertPushed(GenerateInvoicesJob::class);
+    }
+
+    public function test_invoice_mail_excludes_xlsx_and_conditionally_includes_po(): void
+    {
+        $user = \App\Models\User::query()->firstOrFail();
+        $this->actingAs($user);
+
+        $customer = Customer::create([
+            'code' => 'MD999',
+            'name' => 'Cust Mail',
+            'email' => 'cust@example.com',
+            'include_po_attachment' => false,
+            'created_by' => $user->id,
+        ]);
+
+        $po = PurchaseOrder::create([
+            'customer_id' => $customer->id,
+            'invoice_po_code' => 'PO001',
+            'po_number' => 'PO001',
+            'po_date' => '2025-11-01',
+            'subtotal' => 100,
+            'tax_rate' => 0.12,
+            'tax_amount' => 12,
+            'total' => 112,
+            'file_path' => 'po/test.pdf',
+            'file_name' => 'test.pdf',
+            'file_mime' => 'application/pdf',
+            'created_by' => $user->id,
+        ]);
+
+        Storage::disk('local')->put('po/test.pdf', 'po');
+
+        $invoice = app(InvoiceGenerator::class)->generateForPurchaseOrder($po, Carbon::parse('2025-11-01'), false, true);
+        $invoice->refresh();
+
+        $mailable = new InvoiceGenerated($invoice);
+        $attachments = collect($mailable->attachments())->map(fn ($a) => $a->as ?? '')->all();
+        $this->assertFalse(in_array($invoice->invoice_number.'.xlsx', $attachments, true));
+        $this->assertTrue(in_array($invoice->invoice_number.'.pdf', $attachments, true));
+        $this->assertFalse(in_array('test.pdf', $attachments, true));
+
+        $customer->update(['include_po_attachment' => true]);
+        $invoice->refresh();
+        $mailable = new InvoiceGenerated($invoice);
+        $attachments = collect($mailable->attachments())->map(fn ($a) => $a->as ?? '')->all();
+        $this->assertTrue(in_array('test.pdf', $attachments, true));
     }
 }

@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/Components/ConfirmDialog';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
@@ -65,6 +66,7 @@ type Props = {
 
 export default function BayiIndex({ bayis, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [deleteTarget, setDeleteTarget] = useState<Bayi | null>(null);
     const { can } = usePermissions();
 
     const submit = (e?: React.FormEvent) => {
@@ -223,20 +225,11 @@ export default function BayiIndex({ bayis, filters }: Props) {
                                                                 <Button
                                                                     variant="destructive"
                                                                     size="sm"
-                                                                    onClick={() => {
-                                                                        if (
-                                                                            confirm(
-                                                                                'Hapus data bayi?',
-                                                                            )
-                                                                        ) {
-                                                                            router.delete(
-                                                                                route(
-                                                                                    'bayi.destroy',
-                                                                                    bayi.id,
-                                                                                ),
-                                                                            );
-                                                                        }
-                                                                    }}
+                                                                    onClick={() =>
+                                                                        setDeleteTarget(
+                                                                            bayi,
+                                                                        )
+                                                                    }
                                                                 >
                                                                     Hapus
                                                                 </Button>
@@ -280,6 +273,24 @@ export default function BayiIndex({ bayis, filters }: Props) {
                     </div>
                 </div>
             </div>
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Hapus Data Bayi"
+                description={
+                    deleteTarget
+                        ? `Hapus data bayi ${deleteTarget.nama}?`
+                        : undefined
+                }
+                confirmLabel="Hapus"
+                destructive
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => {
+                    if (!deleteTarget) return;
+                    router.delete(route('bayi.destroy', deleteTarget.id), {
+                        onFinish: () => setDeleteTarget(null),
+                    });
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

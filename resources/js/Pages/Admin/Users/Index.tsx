@@ -1,3 +1,4 @@
+import ConfirmDialog from '@/Components/ConfirmDialog';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
@@ -35,6 +36,7 @@ type Props = {
 
 export default function UsersIndex({ users, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
     const flash = usePage().props.flash;
     const { can } = usePermissions();
 
@@ -65,6 +67,16 @@ export default function UsersIndex({ users, filters }: Props) {
                     {flash?.success && (
                         <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                             {flash.success}
+                        </div>
+                    )}
+                    {flash?.info && (
+                        <div className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                            {flash.info}
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            {flash.error}
                         </div>
                     )}
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -160,19 +172,11 @@ export default function UsersIndex({ users, filters }: Props) {
                                                         <Button
                                                             variant="destructive"
                                                             size="sm"
-                                                            onClick={() => {
-                                                                if (
-                                                                    confirm(
-                                                                        'Hapus user?',
-                                                                    )
+                                                            onClick={() =>
+                                                                setDeleteTarget(
+                                                                    user,
                                                                 )
-                                                                    router.delete(
-                                                                        route(
-                                                                            'admin.users.destroy',
-                                                                            user.id,
-                                                                        ),
-                                                                    );
-                                                            }}
+                                                            }
                                                         >
                                                             Hapus
                                                         </Button>
@@ -214,6 +218,27 @@ export default function UsersIndex({ users, filters }: Props) {
                     </div>
                 </div>
             </div>
+            <ConfirmDialog
+                open={!!deleteTarget}
+                title="Hapus User"
+                description={
+                    deleteTarget
+                        ? `Hapus user ${deleteTarget.name}?`
+                        : undefined
+                }
+                confirmLabel="Hapus"
+                destructive
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => {
+                    if (!deleteTarget) return;
+                    router.delete(
+                        route('admin.users.destroy', deleteTarget.id),
+                        {
+                            onFinish: () => setDeleteTarget(null),
+                        },
+                    );
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

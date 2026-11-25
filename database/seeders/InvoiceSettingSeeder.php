@@ -24,6 +24,11 @@ class InvoiceSettingSeeder extends Seeder
             'invoice.generate_day' => ['1', 'integer'],
             'invoice.generate_time' => ['08:00', 'string'],
             'invoice.timezone' => ['Asia/Makassar', 'string'],
+            'invoice.schedule_mode' => ['generate_day', 'string'],
+            'invoice.email_template' => [
+                '<p>Yth. {{customer_name}},</p><p>Invoice {{invoice_number}} untuk periode {{period}} telah dibuat.</p><p>Tanggal: {{invoice_date}}<br>Total: {{total}}</p><p>Terima kasih,<br>{{company_name}}</p>',
+                'string',
+            ],
             'invoice.last_invoice_sequence' => ['1669', 'integer'],
             'invoice.last_customer_number' => ['0', 'integer'],
         ];

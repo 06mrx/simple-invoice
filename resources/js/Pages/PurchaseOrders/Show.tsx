@@ -9,6 +9,7 @@ import {
     TableRow,
 } from '@/Components/ui/table';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatDate } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/react';
 
 type PurchaseOrderItem = {
@@ -78,7 +79,7 @@ export default function PurchaseOrdersShow({
                                     Tanggal
                                 </p>
                                 <p className="font-medium">
-                                    {purchaseOrder.po_date}
+                                    {formatDate(purchaseOrder.po_date)}
                                 </p>
                             </div>
                             <div>

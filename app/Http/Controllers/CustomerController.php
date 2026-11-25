@@ -74,7 +74,10 @@ class CustomerController extends Controller
             'bank_name' => 'nullable|string|max:100',
             'bank_account' => 'nullable|string|max:100',
             'bank_account_name' => 'nullable|string|max:100',
+            'include_po_attachment' => 'boolean',
         ]);
+
+        $data['include_po_attachment'] = $request->boolean('include_po_attachment');
 
         $lastNumber = (int) $this->settings->get('invoice.last_customer_number', 0, $userId);
         $data['code'] = ($data['code'] ?? null) ?: sprintf('MD%03d', $this->sequences->next('customer', $lastNumber + 1));
@@ -118,7 +121,10 @@ class CustomerController extends Controller
             'bank_name' => 'nullable|string|max:100',
             'bank_account' => 'nullable|string|max:100',
             'bank_account_name' => 'nullable|string|max:100',
+            'include_po_attachment' => 'boolean',
         ]);
+
+        $data['include_po_attachment'] = $request->boolean('include_po_attachment');
 
         $customer->update($data);
 

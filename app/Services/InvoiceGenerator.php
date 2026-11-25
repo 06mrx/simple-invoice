@@ -41,25 +41,43 @@ class InvoiceGenerator
         if (! $force) {
             $purchaseOrders = $purchaseOrders->filter(function (PurchaseOrder $purchaseOrder) use ($date) {
                 $ownerId = $purchaseOrder->created_by ? (string) $purchaseOrder->created_by : null;
+                $mode = (string) $this->settings->get('invoice.schedule_mode', 'generate_day', $ownerId);
+
+                if ($mode === 'po_day') {
+                    return $purchaseOrder->po_date
+                        ? $date->day === (int) $purchaseOrder->po_date->day
+                        : false;
+                }
 
                 return $date->day === (int) $this->settings->get('invoice.generate_day', 1, $ownerId);
             });
         }
 
         return $purchaseOrders
-            ->map(fn (PurchaseOrder $purchaseOrder) => $this->generateForPurchaseOrder($purchaseOrder, $date, $includeInstallation))
+            ->map(fn (PurchaseOrder $purchaseOrder) => $this->generateForPurchaseOrder($purchaseOrder, $date, $includeInstallation, $force))
             ->values();
     }
 
-    public function generateForPurchaseOrder(PurchaseOrder $purchaseOrder, ?CarbonInterface $date = null, bool $includeInstallation = false): Invoice
+    public function generateForPurchaseOrder(PurchaseOrder $purchaseOrder, ?CarbonInterface $date = null, bool $includeInstallation = false, bool $force = false): Invoice
     {
         $ownerId = $purchaseOrder->created_by ? (string) $purchaseOrder->created_by : null;
         $date ??= Carbon::now((string) $this->settings->get('invoice.timezone', 'Asia/Makassar', $ownerId));
         $period = $date->copy()->startOfMonth()->toDateString();
         $taxRate = (float) $this->settings->get('invoice.tax_rate', 0, $ownerId);
 
-        $invoice = DB::transaction(function () use ($purchaseOrder, $date, $period, $taxRate, $includeInstallation, $ownerId) {
+        $invoice = DB::transaction(function () use ($purchaseOrder, $date, $period, $taxRate, $includeInstallation, $ownerId, $force) {
             $customer = Customer::where('id', $purchaseOrder->customer_id)->lockForUpdate()->firstOrFail();
+
+            if (! $force) {
+                $existing = Invoice::where('customer_id', $customer->id)
+                    ->where('period', $period)
+                    ->where('created_by', $ownerId)
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+            }
 
             $lastSequence = (int) $this->settings->get('invoice.last_invoice_sequence', 1669, $ownerId);
             $sequence = $this->sequences->next('invoice', $lastSequence + 1);

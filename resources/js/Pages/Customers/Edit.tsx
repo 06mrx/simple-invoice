@@ -1,4 +1,5 @@
 import { Button } from '@/Components/ui/button';
+import { Checkbox } from '@/Components/ui/checkbox';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Textarea } from '@/Components/ui/textarea';
@@ -17,6 +18,7 @@ type Customer = {
     bank_name: string | null;
     bank_account: string | null;
     bank_account_name: string | null;
+    include_po_attachment?: boolean;
 };
 
 export default function CustomersEdit({ customer }: { customer: Customer }) {
@@ -30,6 +32,7 @@ export default function CustomersEdit({ customer }: { customer: Customer }) {
         bank_name: customer.bank_name ?? '',
         bank_account: customer.bank_account ?? '',
         bank_account_name: customer.bank_account_name ?? '',
+        include_po_attachment: customer.include_po_attachment ?? false,
     });
 
     const submit = (e: FormEvent) => {
@@ -151,6 +154,21 @@ export default function CustomersEdit({ customer }: { customer: Customer }) {
                                     }
                                 />
                             </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="include_po_attachment"
+                                checked={data.include_po_attachment}
+                                onCheckedChange={(checked) =>
+                                    setData(
+                                        'include_po_attachment',
+                                        checked === true,
+                                    )
+                                }
+                            />
+                            <Label htmlFor="include_po_attachment">
+                                Sertakan file PO sebagai lampiran email invoice
+                            </Label>
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" asChild>
