@@ -1,3 +1,4 @@
+import InputError from '@/Components/InputError';
 import InputHint from '@/Components/InputHint';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
@@ -39,11 +40,7 @@ export default function PermissionsCreate() {
                                 Format disarankan: view-bayi, create-user,
                                 edit-role.
                             </InputHint>
-                            {errors.name && (
-                                <p className="text-destructive text-sm">
-                                    {errors.name}
-                                </p>
-                            )}
+                            <InputError message={errors.name} />
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" asChild>

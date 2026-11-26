@@ -148,7 +148,9 @@ export default function PurchaseOrdersIndex({
                                             <TableCell>
                                                 {po.invoice_po_code}
                                             </TableCell>
-                                            <TableCell>{formatDate(po.po_date)}</TableCell>
+                                            <TableCell>
+                                                {formatDate(po.po_date)}
+                                            </TableCell>
                                             <TableCell>
                                                 <a
                                                     className="text-primary hover:underline"

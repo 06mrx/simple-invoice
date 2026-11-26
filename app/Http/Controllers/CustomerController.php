@@ -63,12 +63,14 @@ class CustomerController extends Controller
                 Rule::unique('customers', 'code')->where(fn ($query) => $query->where('created_by', $userId)),
             ],
             'name' => 'required|string|max:255',
-            'address' => 'nullable|string',
+            'address' => 'required|string',
             'email' => [
                 'required',
                 'email',
+                'max:255',
                 Rule::unique('customers', 'email')->where(fn ($query) => $query->where('created_by', $userId)),
             ],
+            'email_cc' => ['required', 'string', $this->emailCcRule()],
             'npwp' => 'nullable|string|max:50',
             'phone' => 'nullable|string|max:50',
             'bank_name' => 'nullable|string|max:100',
@@ -78,6 +80,7 @@ class CustomerController extends Controller
         ]);
 
         $data['include_po_attachment'] = $request->boolean('include_po_attachment');
+        $data['email_cc'] = $this->normalizeEmailCc($data['email_cc'] ?? null);
 
         $lastNumber = (int) $this->settings->get('invoice.last_customer_number', 0, $userId);
         $data['code'] = ($data['code'] ?? null) ?: sprintf('MD%03d', $this->sequences->next('customer', $lastNumber + 1));
@@ -110,12 +113,14 @@ class CustomerController extends Controller
                 Rule::unique('customers', 'code')->where(fn ($query) => $query->where('created_by', $userId))->ignore($customer->id),
             ],
             'name' => 'required|string|max:255',
-            'address' => 'nullable|string',
+            'address' => 'required|string',
             'email' => [
                 'required',
                 'email',
+                'max:255',
                 Rule::unique('customers', 'email')->where(fn ($query) => $query->where('created_by', $userId))->ignore($customer->id),
             ],
+            'email_cc' => ['required', 'string', $this->emailCcRule()],
             'npwp' => 'nullable|string|max:50',
             'phone' => 'nullable|string|max:50',
             'bank_name' => 'nullable|string|max:100',
@@ -125,6 +130,7 @@ class CustomerController extends Controller
         ]);
 
         $data['include_po_attachment'] = $request->boolean('include_po_attachment');
+        $data['email_cc'] = $this->normalizeEmailCc($data['email_cc'] ?? null);
 
         $customer->update($data);
 
@@ -144,5 +150,40 @@ class CustomerController extends Controller
     private function ensureOwned(Customer $customer): void
     {
         abort_unless((string) $customer->created_by === (string) auth()->id(), 404);
+    }
+
+    private function emailCcRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            $emails = $this->parseEmailCc($value);
+            $validator = \Illuminate\Support\Facades\Validator::make(
+                ['emails' => $emails],
+                ['emails.*' => ['email']]
+            );
+
+            if ($validator->fails()) {
+                $fail('Format email CC tidak valid. Pisahkan dengan titik koma.');
+            }
+        };
+    }
+
+    private function normalizeEmailCc(?string $value): ?string
+    {
+        $emails = $this->parseEmailCc($value);
+
+        return $emails === [] ? null : implode('; ', array_values(array_unique($emails)));
+    }
+
+    private function parseEmailCc(mixed $value): array
+    {
+        if (! is_string($value) || trim($value) === '') {
+            return [];
+        }
+
+        return collect(preg_split('/[;,]+/', $value) ?: [])
+            ->map(fn ($email) => trim((string) $email))
+            ->filter()
+            ->values()
+            ->all();
     }
 }

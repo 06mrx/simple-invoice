@@ -23,6 +23,7 @@ class Customer extends Model implements Auditable
         'name',
         'address',
         'email',
+        'email_cc',
         'npwp',
         'phone',
         'bank_name',

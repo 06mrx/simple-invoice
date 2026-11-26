@@ -11,7 +11,3 @@ Artisan::command('inspire', function () {
 Schedule::command('invoices:dispatch-due')
     ->hourly()
     ->withoutOverlapping();
-
-Schedule::command('queue:work --stop-when-empty --tries=3 --backoff=10 --max-time=50')
-    ->hourly()
-    ->withoutOverlapping();

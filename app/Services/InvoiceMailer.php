@@ -12,7 +12,22 @@ class InvoiceMailer
     {
         $invoice->loadMissing(['customer', 'purchaseOrder']);
 
-        Mail::to($invoice->customer->email)->send(new InvoiceGenerated($invoice));
+        $to = $invoice->customer?->email;
+        $cc = collect(preg_split('/[;,]+/', (string) ($invoice->customer?->email_cc ?? '')) ?: [])
+            ->map(fn ($email) => trim((string) $email))
+            ->filter()
+            ->reject(fn ($email) => strcasecmp($email, (string) $to) === 0)
+            ->unique(fn ($email) => strtolower($email))
+            ->values()
+            ->all();
+
+        $mail = Mail::to($to);
+
+        if ($cc !== []) {
+            $mail->cc($cc);
+        }
+
+        $mail->send(new InvoiceGenerated($invoice));
 
         $invoice->update([
             'sent_at' => now(),

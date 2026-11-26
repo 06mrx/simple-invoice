@@ -1,3 +1,4 @@
+import InputError from '@/Components/InputError';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
@@ -91,7 +92,7 @@ export default function PurchaseOrdersEdit({
                     >
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <Label>Customer</Label>
+                                <Label>Customer <span className="text-destructive">*</span></Label>
                                 <select
                                     className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
                                     value={data.customer_id}
@@ -108,14 +109,10 @@ export default function PurchaseOrdersEdit({
                                         </option>
                                     ))}
                                 </select>
-                                {errors.customer_id && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.customer_id}
-                                    </p>
-                                )}
+                                <InputError message={errors.customer_id} />
                             </div>
                             <div>
-                                <Label>Kode Invoice (3 digit)</Label>
+                                <Label>Kode Invoice (3 digit) <span className="text-destructive">*</span></Label>
                                 <Input
                                     maxLength={3}
                                     value={data.invoice_po_code}
@@ -126,14 +123,10 @@ export default function PurchaseOrdersEdit({
                                         )
                                     }
                                 />
-                                {errors.invoice_po_code && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.invoice_po_code}
-                                    </p>
-                                )}
+                                <InputError message={errors.invoice_po_code} />
                             </div>
                             <div>
-                                <Label>Tanggal PO</Label>
+                                <Label>Tanggal PO <span className="text-destructive">*</span></Label>
                                 <Input
                                     type="date"
                                     value={data.po_date}
@@ -141,14 +134,10 @@ export default function PurchaseOrdersEdit({
                                         setData('po_date', e.target.value)
                                     }
                                 />
-                                {errors.po_date && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.po_date}
-                                    </p>
-                                )}
+                                <InputError message={errors.po_date} />
                             </div>
                             <div className="sm:col-span-2">
-                                <Label>File PO (PDF)</Label>
+                                <Label>File PO (PDF, opsional)</Label>
                                 <p className="text-muted-foreground mb-1 text-xs">
                                     Kosongkan untuk mempertahankan{' '}
                                     {purchaseOrder.file_name}
@@ -163,17 +152,13 @@ export default function PurchaseOrdersEdit({
                                         )
                                     }
                                 />
-                                {errors.file && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.file}
-                                    </p>
-                                )}
+                                <InputError message={errors.file} />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label>Item PO</Label>
+                                <Label>Item PO <span className="text-destructive">*</span></Label>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -193,9 +178,9 @@ export default function PurchaseOrdersEdit({
                                 </Button>
                             </div>
                             {data.items.map((item, index) => (
+                                <div key={index} className="rounded-md border p-3">
                                 <div
-                                    key={index}
-                                    className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1fr_80px_120px_120px_auto]"
+                                    className="grid gap-2 sm:grid-cols-[1fr_80px_120px_120px_auto]"
                                 >
                                     <Input
                                         placeholder="Deskripsi"
@@ -257,17 +242,20 @@ export default function PurchaseOrdersEdit({
                                         Hapus
                                     </Button>
                                 </div>
+                                <div className="mt-2 space-y-1">
+                                    <InputError message={errors[`items.${index}.description`]} />
+                                    <InputError message={errors[`items.${index}.qty`]} />
+                                    <InputError message={errors[`items.${index}.unit_price`]} />
+                                </div>
+                                </div>
                             ))}
-                            {errors.items && (
-                                <p className="text-destructive text-sm">
-                                    {errors.items}
-                                </p>
-                            )}
+                            <p className="text-muted-foreground text-xs">Minimal 1 item PO.</p>
+                            <InputError message={errors.items} />
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label>Pekerjaan Instalasi</Label>
+                                <Label>Pekerjaan Instalasi (opsional)</Label>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -292,9 +280,9 @@ export default function PurchaseOrdersEdit({
                                 </p>
                             )}
                             {data.installation_items.map((item, index) => (
+                                <div key={index} className="rounded-md border p-3">
                                 <div
-                                    key={index}
-                                    className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1fr_80px_120px_120px_auto]"
+                                    className="grid gap-2 sm:grid-cols-[1fr_80px_120px_120px_auto]"
                                 >
                                     <Input
                                         placeholder="Nama pekerjaan"
@@ -355,22 +343,25 @@ export default function PurchaseOrdersEdit({
                                         Hapus
                                     </Button>
                                 </div>
+                                <div className="mt-2 space-y-1">
+                                    <InputError message={errors[`installation_items.${index}.name`]} />
+                                    <InputError message={errors[`installation_items.${index}.qty`]} />
+                                    <InputError message={errors[`installation_items.${index}.price`]} />
+                                </div>
+                                </div>
                             ))}
-                            {errors.installation_items && (
-                                <p className="text-destructive text-sm">
-                                    {errors.installation_items}
-                                </p>
-                            )}
+                            <InputError message={errors.installation_items} />
                         </div>
 
                         <div>
-                            <Label>Catatan</Label>
+                            <Label>Catatan (opsional)</Label>
                             <Textarea
                                 value={data.notes}
                                 onChange={(e) =>
                                     setData('notes', e.target.value)
                                 }
                             />
+                            <InputError message={errors.notes} />
                         </div>
 
                         <div className="flex justify-end gap-2">

@@ -1,3 +1,4 @@
+import InputError from '@/Components/InputError';
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Input } from '@/Components/ui/input';
@@ -13,6 +14,7 @@ export default function CustomersCreate() {
         name: '',
         address: '',
         email: '',
+        email_cc: '',
         npwp: '',
         phone: '',
         bank_name: '',
@@ -47,39 +49,32 @@ export default function CustomersCreate() {
                                         setData('code', e.target.value)
                                     }
                                 />
-                                {errors.code && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.code}
-                                    </p>
-                                )}
+                                <InputError message={errors.code} />
                             </div>
                             <div>
-                                <Label>Nama</Label>
+                                <Label>Nama <span className="text-destructive">*</span></Label>
                                 <Input
                                     value={data.name}
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
                                 />
-                                {errors.name && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.name}
-                                    </p>
-                                )}
+                                <InputError message={errors.name} />
                             </div>
                         </div>
                         <div>
-                            <Label>Alamat</Label>
+                            <Label>Alamat <span className="text-destructive">*</span></Label>
                             <Textarea
                                 value={data.address}
                                 onChange={(e) =>
                                     setData('address', e.target.value)
                                 }
                             />
+                            <InputError message={errors.address} />
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <Label>Email</Label>
+                                <Label>Email <span className="text-destructive">*</span></Label>
                                 <Input
                                     type="email"
                                     value={data.email}
@@ -87,11 +82,21 @@ export default function CustomersCreate() {
                                         setData('email', e.target.value)
                                     }
                                 />
-                                {errors.email && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.email}
-                                    </p>
-                                )}
+                                <InputError message={errors.email} />
+                            </div>
+                            <div>
+                                <Label>Email CC <span className="text-destructive">*</span></Label>
+                                <Input
+                                    value={data.email_cc}
+                                    placeholder="finance@contoh.com; ops@contoh.com"
+                                    onChange={(e) =>
+                                        setData('email_cc', e.target.value)
+                                    }
+                                />
+                                <p className="text-muted-foreground mt-1 text-xs">
+                                    Pisahkan beberapa email dengan titik koma.
+                                </p>
+                                <InputError message={errors.email_cc} />
                             </div>
                             <div>
                                 <Label>Telepon</Label>
@@ -101,6 +106,7 @@ export default function CustomersCreate() {
                                         setData('phone', e.target.value)
                                     }
                                 />
+                                <InputError message={errors.phone} />
                             </div>
                             <div>
                                 <Label>NPWP</Label>
@@ -110,6 +116,7 @@ export default function CustomersCreate() {
                                         setData('npwp', e.target.value)
                                     }
                                 />
+                                <InputError message={errors.npwp} />
                             </div>
                             <div>
                                 <Label>Bank</Label>
@@ -119,6 +126,7 @@ export default function CustomersCreate() {
                                         setData('bank_name', e.target.value)
                                     }
                                 />
+                                <InputError message={errors.bank_name} />
                             </div>
                             <div>
                                 <Label>No. Rekening</Label>
@@ -128,6 +136,7 @@ export default function CustomersCreate() {
                                         setData('bank_account', e.target.value)
                                     }
                                 />
+                                <InputError message={errors.bank_account} />
                             </div>
                             <div>
                                 <Label>Atas Nama</Label>
@@ -139,6 +148,9 @@ export default function CustomersCreate() {
                                             e.target.value,
                                         )
                                     }
+                                />
+                                <InputError
+                                    message={errors.bank_account_name}
                                 />
                             </div>
                         </div>
@@ -153,9 +165,15 @@ export default function CustomersCreate() {
                                     )
                                 }
                             />
-                            <Label htmlFor="include_po_attachment">
-                                Sertakan file PO sebagai lampiran email invoice
-                            </Label>
+                            <div>
+                                <Label htmlFor="include_po_attachment">
+                                    Sertakan file PO sebagai lampiran email
+                                    invoice
+                                </Label>
+                                <InputError
+                                    message={errors.include_po_attachment}
+                                />
+                            </div>
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" asChild>

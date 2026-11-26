@@ -35,13 +35,17 @@ class InvoiceModuleOwnershipTest extends TestCase
         $this->actingAs($owner)->post(route('customers.store'), [
             'code' => 'CUST001',
             'name' => 'Customer Owner',
+            'address' => 'Alamat Owner',
             'email' => 'same@example.com',
+            'email_cc' => 'cc-owner@example.com',
         ])->assertRedirect(route('customers.index'))->assertSessionHasNoErrors();
 
         $this->actingAs($other)->post(route('customers.store'), [
             'code' => 'CUST001',
             'name' => 'Customer Other',
+            'address' => 'Alamat Other',
             'email' => 'same@example.com',
+            'email_cc' => 'cc-other@example.com',
         ])->assertRedirect(route('customers.index'))->assertSessionHasNoErrors();
 
         $ownedCustomer = Customer::where('created_by', (string) $owner->id)->firstOrFail();

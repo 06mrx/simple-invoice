@@ -1,3 +1,4 @@
+import InputError from '@/Components/InputError';
 import InputHint from '@/Components/InputHint';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
@@ -60,11 +61,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                         setData('nama', e.target.value)
                                     }
                                 />
-                                {errors.nama && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.nama}
-                                    </p>
-                                )}
+                                <InputError message={errors.nama} />
                             </div>
                             <div>
                                 <Label>NIK</Label>
@@ -78,11 +75,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                 <InputHint>
                                     Isi sesuai Kartu Keluarga (16 digit).
                                 </InputHint>
-                                {errors.nik && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.nik}
-                                    </p>
-                                )}
+                                <InputError message={errors.nik} />
                             </div>
                             <div>
                                 <Label>Tanggal Lahir</Label>
@@ -96,11 +89,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                 <InputHint>
                                     Pilih tanggal lahir sesuai akta/KK.
                                 </InputHint>
-                                {errors.tgl_lahir && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.tgl_lahir}
-                                    </p>
-                                )}
+                                <InputError message={errors.tgl_lahir} />
                             </div>
                             <div>
                                 <Label>Jenis Kelamin</Label>
@@ -117,6 +106,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                     <option value="L">Laki-laki</option>
                                     <option value="P">Perempuan</option>
                                 </select>
+                                <InputError message={errors.jk} />
                             </div>
                             <div className="sm:col-span-2">
                                 <Label>Nama Orang Tua</Label>
@@ -127,11 +117,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                         setData('nama_ortu', e.target.value)
                                     }
                                 />
-                                {errors.nama_ortu && (
-                                    <p className="text-destructive text-sm">
-                                        {errors.nama_ortu}
-                                    </p>
-                                )}
+                                <InputError message={errors.nama_ortu} />
                             </div>
                             <div>
                                 <Label>Berat Badan</Label>
@@ -145,6 +131,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                     }
                                 />
                                 <InputHint>Satuan kilogram (kg).</InputHint>
+                                <InputError message={errors.bb} />
                             </div>
                             <div>
                                 <Label>Tinggi Badan</Label>
@@ -158,6 +145,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                     }
                                 />
                                 <InputHint>Satuan sentimeter (cm).</InputHint>
+                                <InputError message={errors.tb} />
                             </div>
                             <div>
                                 <Label>Lingkar Lengan</Label>
@@ -171,6 +159,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                     }
                                 />
                                 <InputHint>Satuan sentimeter (cm).</InputHint>
+                                <InputError message={errors.ll} />
                             </div>
                             <div>
                                 <Label>Lingkar Kepala</Label>
@@ -184,6 +173,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                     }
                                 />
                                 <InputHint>Satuan sentimeter (cm).</InputHint>
+                                <InputError message={errors.lk} />
                             </div>
                             <div className="sm:col-span-2">
                                 <Label>Keterangan</Label>
@@ -197,6 +187,7 @@ export default function BayiEdit({ bayi }: { bayi: Bayi }) {
                                 <InputHint>
                                     Opsional. Isi jika ada catatan penting.
                                 </InputHint>
+                                <InputError message={errors.ket} />
                             </div>
                         </div>
 

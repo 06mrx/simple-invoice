@@ -59,19 +59,26 @@ class PurchaseOrderController extends Controller
 
     public function store(Request $request)
     {
-        $data = $this->validateRequest($request, true);
+        $data = $this->validateRequest($request);
 
         $purchaseOrder = DB::transaction(function () use ($data, $request) {
-            $path = $this->storeFile($request->file('file'), $data['customer_id']);
+            $fileData = [];
 
-            $purchaseOrder = PurchaseOrder::create([
+            if ($request->hasFile('file')) {
+                $fileData = [
+                    'file_path' => $this->storeFile($request->file('file'), $data['customer_id']),
+                    'file_name' => $request->file('file')->getClientOriginalName(),
+                ];
+            }
+
+            $purchaseOrder = PurchaseOrder::create(array_merge([
                 'customer_id' => $data['customer_id'],
                 'invoice_po_code' => $data['invoice_po_code'],
                 'po_date' => $data['po_date'],
-                'file_path' => $path,
-                'file_name' => $request->file('file')->getClientOriginalName(),
+                'file_path' => null,
+                'file_name' => null,
                 'notes' => $data['notes'] ?? null,
-            ]);
+            ], $fileData));
 
             $this->syncItems($purchaseOrder, $data['items']);
             $this->syncInstallationItems($purchaseOrder, $data['installation_items'] ?? []);
@@ -107,7 +114,7 @@ class PurchaseOrderController extends Controller
     public function update(Request $request, PurchaseOrder $purchaseOrder)
     {
         $this->ensureOwned($purchaseOrder);
-        $data = $this->validateRequest($request, false);
+        $data = $this->validateRequest($request);
 
         DB::transaction(function () use ($data, $request, $purchaseOrder) {
             $fileData = [];
@@ -170,7 +177,7 @@ class PurchaseOrderController extends Controller
         return Customer::where('created_by', auth()->id())->orderBy('code')->get(['id', 'code', 'name']);
     }
 
-    protected function validateRequest(Request $request, bool $requireFile): array
+    protected function validateRequest(Request $request): array
     {
         $data = $request->validate([
             'customer_id' => [
@@ -178,18 +185,18 @@ class PurchaseOrderController extends Controller
                 'uuid',
                 Rule::exists('customers', 'id')->where(fn ($query) => $query->where('created_by', auth()->id())),
             ],
-            'invoice_po_code' => 'required|string|regex:/^\d{3}$/',
-            'po_date' => 'required|date',
-            'file' => ($requireFile ? 'required' : 'nullable').'|file|mimes:pdf|max:10240',
-            'notes' => 'nullable|string',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string|max:255',
-            'items.*.qty' => 'required|numeric|min:0',
-            'items.*.unit_price' => 'required|numeric|min:0',
-            'installation_items' => 'nullable|array',
-            'installation_items.*.name' => 'required|string|max:255',
-            'installation_items.*.qty' => 'required|numeric|min:0',
-            'installation_items.*.price' => 'required|numeric|min:0',
+            'invoice_po_code' => ['required', 'string', 'regex:/^\d{3}$/'],
+            'po_date' => ['required', 'date'],
+            'file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.description' => ['required', 'string', 'max:255'],
+            'items.*.qty' => ['required', 'numeric', 'gt:0'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'installation_items' => ['nullable', 'array'],
+            'installation_items.*.name' => ['required', 'string', 'max:255'],
+            'installation_items.*.qty' => ['required', 'numeric', 'gt:0'],
+            'installation_items.*.price' => ['required', 'numeric', 'min:0'],
         ]);
 
         return $data;

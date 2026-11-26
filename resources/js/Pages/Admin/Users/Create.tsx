@@ -1,3 +1,4 @@
+import InputError from '@/Components/InputError';
 import InputHint from '@/Components/InputHint';
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
@@ -50,11 +51,7 @@ export default function UsersCreate({ roles }: { roles: Role[] }) {
                                     setData('name', e.target.value)
                                 }
                             />
-                            {errors.name && (
-                                <p className="text-destructive text-sm">
-                                    {errors.name}
-                                </p>
-                            )}
+                            <InputError message={errors.name} />
                         </div>
                         <div>
                             <Label>Email</Label>
@@ -66,11 +63,7 @@ export default function UsersCreate({ roles }: { roles: Role[] }) {
                                     setData('email', e.target.value)
                                 }
                             />
-                            {errors.email && (
-                                <p className="text-destructive text-sm">
-                                    {errors.email}
-                                </p>
-                            )}
+                            <InputError message={errors.email} />
                         </div>
                         <div>
                             <Label>Password</Label>
@@ -83,11 +76,7 @@ export default function UsersCreate({ roles }: { roles: Role[] }) {
                                 }
                             />
                             <InputHint>Gunakan minimal 6 karakter.</InputHint>
-                            {errors.password && (
-                                <p className="text-destructive text-sm">
-                                    {errors.password}
-                                </p>
-                            )}
+                            <InputError message={errors.password} />
                         </div>
                         <div>
                             <Label>Roles</Label>
@@ -113,6 +102,7 @@ export default function UsersCreate({ roles }: { roles: Role[] }) {
                                 ))}
                             </div>
                         </div>
+                        <InputError message={errors.roles} />
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={route('admin.users.index')}>

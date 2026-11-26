@@ -59,7 +59,9 @@ class InvoiceSettingSequenceTest extends TestCase
 
         $this->actingAs($admin)->post(route('customers.store'), [
             'name' => 'PT Cross Network Indonesia',
+            'address' => 'Jl. Test 1',
             'email' => 'customer@example.com',
+            'email_cc' => 'cc@example.com',
         ])->assertRedirect(route('customers.index'))->assertSessionHasNoErrors();
 
         $customer = Customer::where('email', 'customer@example.com')->firstOrFail();

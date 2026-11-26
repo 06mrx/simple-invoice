@@ -1,4 +1,5 @@
 import ConfirmDialog from '@/Components/ConfirmDialog';
+import InputError from '@/Components/InputError';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
@@ -124,6 +125,9 @@ export default function InvoicesIndex({
                                             )
                                         }
                                     />
+                                    <InputError
+                                        message={generate.errors.date}
+                                    />
                                 </div>
                                 <div className="min-w-64">
                                     <Label>PO Tertentu (opsional)</Label>
@@ -144,6 +148,11 @@ export default function InvoicesIndex({
                                             </option>
                                         ))}
                                     </select>
+                                    <InputError
+                                        message={
+                                            generate.errors.purchase_order_id
+                                        }
+                                    />
                                 </div>
                                 <label className="flex items-center gap-2 pb-2 text-sm">
                                     <Checkbox

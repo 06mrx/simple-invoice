@@ -1,3 +1,4 @@
+import InputError from '@/Components/InputError';
 import InputHint from '@/Components/InputHint';
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
@@ -56,11 +57,7 @@ export default function RolesCreate({
                                 Gunakan huruf kecil tanpa spasi, contoh: admin,
                                 petugas.
                             </InputHint>
-                            {errors.name && (
-                                <p className="text-destructive text-sm">
-                                    {errors.name}
-                                </p>
-                            )}
+                            <InputError message={errors.name} />
                         </div>
                         <div>
                             <Label>Permissions</Label>
@@ -86,6 +83,7 @@ export default function RolesCreate({
                                 ))}
                             </div>
                         </div>
+                        <InputError message={errors.permissions} />
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={route('admin.roles.index')}>
